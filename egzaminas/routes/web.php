@@ -17,6 +17,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('tickets', TicketController::class);
+    Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create'); //create tickets
+    Route::get('/ticketsystem', [TicketController::class, 'index'])->name('ticketsystem'); //view all tickets, doesn't work because index brokey
+    Route::post('/dashboard', [TicketController::class, 'store'])->name('tickets.store');
+
+
 });
 
 require __DIR__.'/auth.php';
