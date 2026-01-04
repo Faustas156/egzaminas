@@ -23,24 +23,21 @@ public function index()
 {
     return view('ticket');
 }
+
+public function allTickets()
+{
+    $tickets = Ticket::with(['categories', 'messages'])->orderBy('created_at', 'desc')->get();
+
+    return view('tickets.index', compact('tickets'));
+}
 public function store(Request $request)
 {
     /** @var User */
     $user = Auth::user();
  
-    // $ticket = $user->tickets()
-    //                 ->create($request->validated());
- 
     $categories = Category::first();
     $labels = Label::first();
  
-    // $ticket->attachCategories($categories);
-    // $ticket->attachLabels($labels);
- 
-    // or you can create the categories & the tickets directly by:
-    // $ticket->categories()->create(...);
-    // $ticket->labels()->create(...);
-
     $request->validate([
         'title' => 'required|string|max:255',
         'message' => 'required|string',
@@ -48,15 +45,20 @@ public function store(Request $request)
     ]);
 
     $ticket = Ticket::create([
-        'title' => $request->input('title'),
-        'description' => $request->input('message'),
-        'category_id' => $request->category_id,
+        'title' => $request->title,
+        'status' => 'open', // default status, 1 yra naujas, 2 yra vykdomas, 3 yra uzbaigtas (open, in progress, closed)
         'user_id' => $user->id,
-        'status_id' => 1, // default status, 1 yra naujas, 2 yra vykdomas, 3 yra uzbaigtas 
+    ]);
 
+    $ticket->attachCategories($request->category_id);
+
+    $ticket->messages()->create([
+        'message' => $request->message,
+        'user_id' => $user->id,
+        //'category_id' => $request->category_id,
     ]);
  
-    return redirect(route('/dashboard'))
+    return redirect(route('dashboard'))
             ->with('success', __('Your Ticket Was created successfully.'));
 }
  

@@ -4,6 +4,15 @@
             {{ __('Create Ticket') }}
         </h2>
     </x-slot>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
     <div class="flex flex-col justify-center items-center p-6">
         <form method="POST" action="{{ route('tickets.store') }}" class="space-y-4 w-full max-w-md">
             @csrf
@@ -15,7 +24,7 @@
 
             <div>
                 <label for="description" class="block mb-2 text-sm font-medium text-gray-700">Description</label>
-                <textarea id="description" name="description" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required></textarea>
+                <textarea id="message" name="message" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required></textarea>
                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
 
@@ -29,7 +38,7 @@
                     </option>
                     @endforeach
                 </select>
-                <x-input-error :messages="$errors->get('priority')" class="mt-2" />
+                <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
             </div>
 
             <div class="text-center">

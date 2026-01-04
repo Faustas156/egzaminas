@@ -11,5 +11,12 @@ class Ticket extends Model
 
     protected $table = "tickets";
 
+    protected $fillable = [
+        'title',
+        'body',
+        'user_id',
+        'status_id',
+        'category_id',
+    ];
     public $timestamps = true;
 }
