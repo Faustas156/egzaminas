@@ -22,11 +22,22 @@
             <p class="text-sm text-gray-500">
                 {{ $ticket->created_at->diffForHumans() }}
             </p>
-        @if($user->role === 'admin' || Auth::id() === $ticket->user_id)
-                <a href="{{ route('tickets.edit', $ticket) }}" class="text-blue-600 hover:underline">
-                    Edit
-                </a>
+            @if($user->role === 'admin' || Auth::id() === $ticket->user_id)
+            <a href="{{ route('tickets.edit', $ticket) }}" class="text-blue-600 hover:underline">
+                Edit
+            </a>
             @endif
+            @can('delete', $ticket)
+            <form action="{{ route('tickets.destroy', $ticket) }}" method="POST" class="inline-block">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                    class="text-red-600 hover:underline"
+                    onclick="return confirm('Are you sure you want to delete this ticket?')">
+                    Delete
+                </button>
+            </form>
+            @endcan
         </div>
         @empty
         <p>No tickets found.</p>

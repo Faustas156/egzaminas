@@ -43,10 +43,11 @@ class TicketPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Ticket $ticket): bool
+    public function delete(User $user, Ticket $ticket)
     {
-        return $user->isAdmin() || $ticket->user_id === $user->id;
+        return $user->isAdmin() || $ticket->user_id === $user->id ? Response::allow() : Response::deny('You cannot delete this ticket.');
     }
+
 
     /**
      * Determine whether the user can restore the model.

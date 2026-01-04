@@ -98,6 +98,18 @@ class TicketController extends Controller
 
         return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
     }
+
+    public function destroy(Ticket $ticket)
+    {
+        // Authorization
+        Gate::authorize('delete', $ticket);
+
+        $ticket->delete();
+
+        return redirect()->route('tickets.index')
+            ->with('success', 'Ticket deleted successfully.');
+    }
+
     public function createCategory()
     {
         // If you create a category/categories seperated from the ticket and wants to
