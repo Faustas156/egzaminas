@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role', // user role, e.g., 'admin' or 'user', etc.
         'password',
     ];
 
@@ -51,5 +52,10 @@ class User extends Authenticatable
     public function tickets(): HasMany 
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }

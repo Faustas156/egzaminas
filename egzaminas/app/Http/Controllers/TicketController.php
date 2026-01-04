@@ -12,31 +12,24 @@ use Illuminate\Support\Facades\Auth;
 class TicketController extends Controller
 {
 
+public function index()
+{
+    $tickets = Ticket::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+
+    return view('tickets.index', compact('tickets'));
+}
+
 public function create()
 {
     $categories = Category::all();
 
-    return view('ticket', compact('categories'));
+    return view('tickets.create', compact('categories'));
 }
 
-public function index()
-{
-    return view('ticket');
-}
-
-public function allTickets()
-{
-    $tickets = Ticket::with(['categories', 'messages'])->orderBy('created_at', 'desc')->get();
-
-    return view('tickets.index', compact('tickets'));
-}
 public function store(Request $request)
 {
     /** @var User */
     $user = Auth::user();
- 
-    $categories = Category::first();
-    $labels = Label::first();
  
     $request->validate([
         'title' => 'required|string|max:255',
@@ -62,6 +55,12 @@ public function store(Request $request)
             ->with('success', __('Your Ticket Was created successfully.'));
 }
  
+public function allTickets()
+{
+    $tickets = Ticket::with(['categories', 'messages'])->orderBy('created_at', 'desc')->get();
+
+    return view('tickets.index', compact('tickets'));
+}
 public function createCategory()
 {
     // If you create a category/categories seperated from the ticket and wants to
