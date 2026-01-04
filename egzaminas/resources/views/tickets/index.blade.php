@@ -22,6 +22,11 @@
             <p class="text-sm text-gray-500">
                 {{ $ticket->created_at->diffForHumans() }}
             </p>
+            @can('view', $ticket)
+            <a href="{{ route('tickets.show', $ticket) }}" class="text-green-600 hover:underline">
+                View
+            </a>
+            @endcan
             @if($user->role === 'admin' || Auth::id() === $ticket->user_id)
             <a href="{{ route('tickets.edit', $ticket) }}" class="text-blue-600 hover:underline">
                 Edit

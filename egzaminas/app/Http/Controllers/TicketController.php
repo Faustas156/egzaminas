@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TicketNewMessage;
+use App\Mail\TicketStatusUpdated;
 use App\Models\Ticket;
 use Coderflex\LaravelTicket\Models\Category;
 use Coderflex\LaravelTicket\Models\Label;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 
@@ -96,12 +99,15 @@ class TicketController extends Controller
             'user_id' => Auth::id(),
         ]);
 
+        if ($ticket->user_id !== Auth::id()) {
+            Mail::to($ticket->user->email)->send(new TicketNewMessage($ticket, $request->message));
+        }
+
         return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
     }
 
     public function destroy(Ticket $ticket)
     {
-        // Authorization
         Gate::authorize('delete', $ticket);
 
         $ticket->delete();
@@ -109,6 +115,49 @@ class TicketController extends Controller
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket deleted successfully.');
     }
+
+    public function show(Ticket $ticket)
+    {
+        Gate::authorize('view', $ticket);
+        $ticket->load('messages.user');
+
+
+        return view('tickets.show', compact('ticket'));
+    }
+
+    public function updateStatus(Request $request, Ticket $ticket)
+    {
+        Gate::authorize('update', $ticket);
+
+        $request->validate([
+            'status' => 'required|in:open,in_progress,closed',
+        ]);
+
+        $ticket->update([
+            'status' => $request->status,
+        ]);
+
+        Mail::to($ticket->user->email)->send(new TicketStatusUpdated($ticket));
+
+        return redirect()->route('tickets.show', $ticket)->with('success', 'Ticket status updated successfully.');
+    }
+
+    public function addComment(Request $request, Ticket $ticket)
+    {
+        Gate::authorize('view', $ticket);
+
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $ticket->messages()->create([
+            'message' => $request->message,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('tickets.show', $ticket)->with('success', 'Comment added successfully.');
+    }
+
 
     public function createCategory()
     {

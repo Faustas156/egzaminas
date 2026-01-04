@@ -16,7 +16,7 @@ class Ticket extends BaseTicket
         'title',
         'body',
         'user_id',
-        'status_id',
+        'status',
         'category_id',
     ];
     public $timestamps = true;

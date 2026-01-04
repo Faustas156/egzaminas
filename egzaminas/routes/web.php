@@ -19,6 +19,8 @@ Route::middleware('auth')->group(function () {
     
     Route::resource('tickets', TicketController::class);
     Route::get('/ticketsystem', [TicketController::class, 'allTickets'])->name('ticketsystem');
+    Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.updateStatus');
+    Route::post('/tickets/{ticket}/comment', [TicketController::class, 'addComment'])->name('tickets.addComment');
 
 });
 
