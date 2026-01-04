@@ -22,6 +22,11 @@
             <p class="text-sm text-gray-500">
                 {{ $ticket->created_at->diffForHumans() }}
             </p>
+        @if($user->role === 'admin' || Auth::id() === $ticket->user_id)
+                <a href="{{ route('tickets.edit', $ticket) }}" class="text-blue-600 hover:underline">
+                    Edit
+                </a>
+            @endif
         </div>
         @empty
         <p>No tickets found.</p>
