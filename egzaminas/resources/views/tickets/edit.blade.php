@@ -11,7 +11,7 @@
             @method('PUT')
 
             <div class="mb-4">
-                <label class="block mb-1 font-medium">Title</label>
+                <label class="block mb-1 font-medium text-gray-700 dark:text-gray-300">Title</label>
                 <input
                     type="text"
                     name="title"
@@ -22,7 +22,7 @@
             </div>
 
             <div class="mb-4">
-                <label class="block mb-1 font-medium">Update message</label>
+                <label class="block mb-1 font-medium text-gray-700 dark:text-gray-300">Update message</label>
                 <textarea
                     name="message"
                     rows="4"
@@ -32,7 +32,7 @@
             </div>
 
             <div class="mb-4">
-                <label class="block mb-1 font-medium">Category</label>
+                <label class="block mb-1 font-medium text-gray-700 dark:text-gray-300">Category</label>
                 <select name="category_id" class="w-full border rounded px-3 py-2">
                     @foreach ($categories as $category)
                         <option
@@ -47,8 +47,9 @@
 
             <button
                 type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded"
-            >
+                class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md
+                 font-semibold text-sm text-white hover:bg-gray-700 focus:outline-none
+                 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition">
                 Update Ticket
             </button>
         </form>

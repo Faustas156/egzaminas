@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use App\Http\Controllers\Controller;
 use App\Mail\TicketNewMessage;
 use App\Mail\TicketStatusUpdated;
@@ -18,8 +19,9 @@ class TicketController extends Controller
 
     public function index()
     {
-        $tickets = Ticket::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
         $user = Auth::user();
+
+        $tickets = $user->role === 'admin' ? Ticket::orderBy('created_at', 'desc')->get() : Ticket::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
 
         return view('tickets.index', compact('tickets', 'user'));
     }
@@ -44,7 +46,7 @@ class TicketController extends Controller
 
         $ticket = Ticket::create([
             'title' => $request->title,
-            'status' => 'open', // default status, 1 yra naujas, 2 yra vykdomas, 3 yra uzbaigtas (open, in progress, closed)
+            'status' => 'open', // default status, open yra naujas, in_progress yra vykdomas, closed yra uzbaigtas
             'user_id' => $user->id,
         ]);
 
@@ -56,16 +58,8 @@ class TicketController extends Controller
             //'category_id' => $request->category_id,
         ]);
 
-        return redirect(route('dashboard'))
+        return redirect(route('tickets.index'))
             ->with('success', __('Your Ticket Was created successfully.'));
-    }
-
-    public function allTickets()
-    {
-        $tickets = Ticket::with(['categories', 'messages'])->orderBy('created_at', 'desc')->get();
-        $user = Auth::user();
-
-        return view('tickets.index', compact('tickets'));
     }
 
     public function edit(Ticket $ticket)
@@ -74,7 +68,6 @@ class TicketController extends Controller
 
         $categories = Category::all();
         return view('tickets.edit', compact('ticket', 'categories'));
-        // return view('tickets.edit', ['ticket' => $ticket, 'user' => Auth::user()]);
     }
 
     public function update(Request $request, Ticket $ticket)
@@ -93,15 +86,12 @@ class TicketController extends Controller
 
         $ticket->categories()->sync([$request->category_id]);
 
-        // Add a new message as an update note
         $ticket->messages()->create([
             'message' => $request->message,
             'user_id' => Auth::id(),
         ]);
 
-        if ($ticket->user_id !== Auth::id()) {
-            Mail::to($ticket->user->email)->send(new TicketNewMessage($ticket, $request->message));
-        }
+        Mail::to($ticket->user->email)->send(new TicketNewMessage($ticket, $request->message));
 
         return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
     }
@@ -155,19 +145,27 @@ class TicketController extends Controller
             'user_id' => Auth::id(),
         ]);
 
+        if ($ticket->user_id !== Auth::id()) {
+        Mail::to($ticket->user->email)->send(new TicketNewMessage($ticket, $request->message));
+    }
+
         return redirect()->route('tickets.show', $ticket)->with('success', 'Comment added successfully.');
     }
 
-
-    public function createCategory()
+    public function exportPdf()
     {
-        // If you create a category/categories seperated from the ticket and wants to
-        // associate it to a ticket, you may do the following.
-        // $category = Category::create(...);
+        // Get all active tickets for the current user (or all if admin)
+        $tickets = Auth::user()->isAdmin()
+            ? Ticket::where('status', '!=', 'closed')->get()
+            : Ticket::where('user_id', Auth::id())
+            ->where('status', '!=', 'closed')
+            ->get();
 
-        // $category->tickets()->attach($ticket);
+        $html = view('tickets.pdf', compact('tickets'))->render();
 
-        // // or maybe
-        // $category->tickets()->detach($ticket);
+        $pdf = PDF::loadHTML($html);
+
+        // Download the PDF
+        return $pdf->download('active-tickets.pdf');
     }
 }

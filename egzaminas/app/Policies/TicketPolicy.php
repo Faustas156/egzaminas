@@ -21,7 +21,8 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        return true;
+        // Admin can view all tickets, others only their own
+        return $user->role === 'admin' || $ticket->user_id === $user->id;
     }
 
     /**
